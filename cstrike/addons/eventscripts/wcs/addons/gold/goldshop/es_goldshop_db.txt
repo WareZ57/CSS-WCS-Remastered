@@ -1,0 +1,417 @@
+"goldshop"
+{
+	"Boots of Speed"
+	{
+		"name"		"Boots of Speed"
+		"description"		"Gain a slight speed boost (stacks)"
+		"cost"		"200"
+		"category"		"1"
+		"max_amount"		"2"
+		"required"		"0"
+		"block"		"speed"
+	}
+	"Flickering Shadows"
+	{
+		"name"		"Flickering Shadows"
+		"description"		"Invisibility that flickers"
+		"cost"		"300"
+		"category"		"1"
+		"max_amount"		"1"
+		"required"		"10"
+		"block"		"flicker"
+	}
+	"Sock of the Feather"
+	{
+		"name"		"Sock of the Feather"
+		"description"		"Lower your Gravity (stacks)"
+		"cost"		"400"
+		"category"		"1"
+		"max_amount"		"1"
+		"required"		"20"
+		"block"		"gravity"
+	}
+	"Blinking Invisibility"
+	{
+		"name"		"Blinking Invisibility"
+		"description"		"Invisibility that blinks"
+		"cost"		"500"
+		"category"		"1"
+		"max_amount"		"1"
+		"required"		"30"
+		"block"		"blink"
+	}
+	"Long Jump"
+	{
+		"name"		"Long Jump"
+		"description"		"Slightly increase your jumping distance (stacks)"
+		"cost"		"600"
+		"category"		"1"
+		"max_amount"		"3"
+		"required"		"40"
+		"block"		"longjump"
+	}
+	"Fading Cloack"
+	{
+		"name"		"Fading Cloack"
+		"description"		"Invisibility that fades in and out"
+		"cost"		"700"
+		"category"		"1"
+		"max_amount"		"1"
+		"required"		"50"
+		"block"		"fade"
+	}
+	"Partial Invisibility"
+	{
+		"name"		"Partial Invisibility"
+		"description"		"Partial invisibility"
+		"cost"		"800"
+		"category"		"1"
+		"max_amount"		"1"
+		"required"		"60"
+		"block"		"invisibility"
+	}
+	
+	
+	"Half Armor"
+	{
+		"name"		"Half Armor"
+		"description"		"50 armor"
+		"cost"		"50"
+		"category"		"2"
+		"max_amount"		"1"
+		"required"		"0"
+		"block"		"halfarmor"
+	}
+
+	"Full Armor"
+	{
+		"name"		"Full Armor"
+		"description"		"100 armor"
+		"cost"		"150"
+		"category"		"2"
+		"max_amount"		"1"
+		"required"		"25"
+		"block"		"fullarmor"
+	}
+	"Padded Armor"
+	{
+		"name"		"Padded Armor"
+		"description"		"Prevents Fall Damage"
+		"cost"		"200"
+		"category"		"2"
+		"max_amount"		"1"
+		"required"		"45"
+		"block"		"antifall"
+	}
+	"Gold Helmet"
+	{
+		"name"		"Gold Helmet"
+		"description"		"Pretection from Headshots"
+		"cost"		"300"
+		"category"		"2"
+		"max_amount"		"1"
+		"required"		"15"
+		"block"		"helmet"
+	}
+	"+50 Clip(Secondary)"
+	{
+		"name"		"+50 Clip(Secondary)"
+		"description"		"add 50 ammo to your secondary weapon"
+		"cost"		"350"
+		"category"		"2"
+		"max_amount"		"2"
+		"required"		"35"
+		"block"		"50clip"
+	}
+
+	"+150 CLip(150 Clip Primary)"
+	{
+		"name"		"+150 CLip(150 Clip Primary)"
+		"description"		"add 150 ammo to your primary weapon"
+		"cost"		"500"
+		"category"		"2"
+		"max_amount"		"2"
+		"required"		"55"
+		"block"		"150clip"
+	}
+	
+	"Spiked Claws-Cleets"
+	{
+		"name"		"Spiked Claws-Cleets"
+		"description"		"Slight increase in step size and ability to wallk over objects or up high walls (stacks)"
+		"cost"		"600"
+		"max_amount"		"1"
+		"category"		"2"
+		"required"		"65"
+		"block"		"step"
+	}
+
+	
+	"Half Potion"
+	{
+		"name"		"Half Potion"
+		"description"		"50 HP"
+		"cost"		"400"
+		"max_amount"		"1"
+		"category"		"3"
+		"required"		"12"
+		"block"		"50hp"
+	}
+	
+	"30Xp"
+	{
+		"name"		"30Xp"
+		"description"		"Gain 30 XP"
+		"cost"		"500"
+		"max_amount"		"1"
+		"category"		"3"
+		"required"		"22"
+		"block"		"30xp"
+	}	
+		
+	"Full Potion"
+	{
+		"name"		"Full Potion"
+		"description"		"100 HP"
+		"cost"		"600"
+		"max_amount"		"1"
+		"category"		"3"
+		"required"		"42"
+		"block"		"100hp"
+	}
+
+  "60Xp"
+	{
+		"name"		"60Xp"
+		"description"		"Gain 60 XP"
+		"cost"		"600"
+		"max_amount"		"1"
+		"category"		"3"
+		"required"		"50"
+		"block"		"60xp"
+	}	
+	
+  "1 Level"
+	{
+		"name"		"1 Level"
+		"description"		"1 Level"
+		"cost"		"1000"
+		"max_amount"		"1"
+		"category"		"3"
+		"required"		"63"
+		"block"		"1level"
+	}
+   "2 Levels"
+	{
+		"name"		"2 Levels"
+		"description"		"2 Levels"
+		"cost"		"1700"
+		"max_amount"		"1"
+		"category"		"3"
+		"required"		"63"
+		"block"		"2level"
+	}		
+		
+	"Disguise"
+	{
+		"name"		"Disguise"
+		"description"		"Disguise your self as the enemy team"
+		"cost"		"350"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"33"
+		"block"		"disguise"
+	}
+	"Poison Smoke Grenades"
+	{
+		"name"		"Poison Smoke Grenades"
+		"description"		"Smoke grenades with toxic smoke"
+		"cost"		"450"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"43"
+		"block"		"ps"
+	}
+	"Fire Grenades"
+	{
+		"name"		"Fire Grenades"
+		"description"		"Grenades that explode into flames"
+		"cost"		"600"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"53"
+		"block"		"fg"
+	}
+	"Teleport Flash Bangs"
+	{
+		"name"		"Teleport Flash Bangs"
+		"description"		"Teleport to the location the flash bang detonates"
+		"cost"		"800"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"63"
+		"block"		"tfb"
+	}
+	"slingshot"
+	{
+		"name"		"Slingshot"
+		"description"		"Use your glock to slingshot around the map"
+		"cost"		"900"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"73"
+		"block"		"slingshot"
+	}
+	"respawn"
+	{
+		"name"		"ReSpawn"
+		"description"		"ReSpawn in 3 seconds"
+		"cost"		"500"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"32"
+		"block"		"respawn"
+	}
+		
+	"Reincarnation"
+	{
+		"name"		"Reincarnation"
+		"description"		"ReSpawn if you Die"
+		"cost"		"700"
+		"max_amount"		"1"
+		"category"		"4"
+	  "required"		"52"
+		"block"		"reincarnate"
+	}
+	
+	"Resurrect"
+	{
+		"name"		"Resurrect"
+		"description"		"ReSpawn at the location you were killed"
+		"cost"		"800"
+		"max_amount"		"1"
+		"category"		"4"
+		"required"		"62"
+		"block"		"resurrect"
+	}
+	"fireball"
+	{
+		"name"		"FireBall"
+		"description"		"cause 7 additional damage per hit"
+		"cost"		"300"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"44"
+		"block"		"fireball"
+	}
+	"Thunder"
+	{
+		"name"		"Thunder"
+		"description"		"Shakes the enemy when hit"
+		"cost"		"400"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"54"
+		"block"		"thunder"
+	}
+	"Shock"
+	{
+		"name"		"Shock"
+		"description"		"Stuns the enemy when hit"
+		"cost"		"500"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"64"
+		"block"		"shock"
+	}
+	"Burn and Blind"
+	{
+		"name"		"Burn and Blind"
+		"description"		"Burns and Blinds the enemy when hit"
+		"cost"		"600"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"74"
+		"block"		"burnblind"
+	}
+	"Frost Fire"
+	{
+		"name"		"Frost Fire"
+		"description"		"Freezes then burns the enemy when hit"
+		"cost"		"700"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"84"
+		"block"		"frostshot"
+	}
+	"Nether Blast"
+	{
+		"name"		"Nether Blast"
+		"description"		"impair the enemy when hit"
+		"cost"		"800"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"94"
+		"block"		"blast"
+	}
+	"Astral Imprisonment"
+	{
+		"name"		"Astral Imprisonment"
+		"description"		"Sends the enmy to a Astral Imprisonment for a short time"
+		"cost"		"900"
+		"max_amount"		"1"
+		"category"		"5"
+		"required"		"104"
+		"block"		"astrial"
+	}
+	"scope"
+	{
+		"name"		"Scope"
+		"description"		"Use a Scope on any weapon (Bind +ability)"
+		"cost"		"300"
+		"max_amount"		"1"
+		"category"		"6"
+		"required"		"55"
+		"block"		"scope"
+	}
+	"Jet Pack"
+	{
+		"name"		"Jet Pack"
+		"description"		"Bind +ability to Fly"
+		"cost"		"400"
+		"max_amount"		"1"
+		"category"		"6"
+		"required"		"66"
+		"block"		"jetpack"
+	}
+	"Complete Invisibility"
+	{
+		"name"		"Complete Invisibility"
+		"description"		"Bind a key to +ability and hold key to become invisible"
+		"cost"		"700"
+		"max_amount"		"1"
+		"category"		"6"
+		"required"		"77"
+		"block"		"completeinvis"
+	}
+	"Wall Hack"
+	{
+		"name"		"Wall Hack"
+		"description"		"Bind a key to +ability and hold key to activate wall hack"
+		"cost"		"1100"
+		"max_amount"		"1"
+		"category"		"6"
+		"required"		"99"
+		"block"		"wallhack"
+	}
+	"Rocket Launcher"
+	{
+		"name"		"Rocket Launcher"
+		"description"		"Bind a key to +ability and hold key untill fully charged to launch a rocket"
+		"cost"		"1300"
+		"max_amount"		"1"
+		"category"		"6"
+		"required"		"111"
+		"block"		"rocketlauncher"
+	}
+}

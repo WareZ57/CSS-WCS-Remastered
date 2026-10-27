@@ -1,0 +1,43 @@
+"goldshop_cat"
+{
+  "1"
+  {
+    "name"  "Enhancements"
+    "kills_required"  "0"
+  }
+  
+  "2"
+  {
+    "name"  "Equiptment"
+    "kills_required"  "0"
+  }
+  
+  "3"
+  {
+    "name"  "Powerups"
+    "kills_required"  "22"
+  }
+   
+  "4"
+  {
+    "name"  "Tactics"
+    "kills_required"  "33"
+  }
+  
+  "5"
+  {
+    "name"  "Attack"
+    "kills_required"  "44"
+  }
+
+  "6"
+  {
+    "name"  "Special"
+    "kills_required"  "55"
+  }
+  //"7"
+  //{
+    //"name"  "Spells"
+    //"kills_required"  "400"
+  //}
+}

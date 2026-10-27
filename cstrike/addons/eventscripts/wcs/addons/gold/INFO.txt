@@ -1,0 +1,257 @@
+************************************
+***      GOLD Version 2.0        ***
+***     Coded by HOLLIDAY        ***
+************************************
+**  www.holliday.clanservers.com  **
+**     www.bamheadshot.com        **
+************************************
+************************************
+Description:
+  Players receive gold for kills that can be spent items in the goldshop
+  say goldshop to open the goldshop menu
+  you will unlock new items and categories in the goldshop as you progress
+************************************
+ Requires:
+  eventscripts 2.0
+  es_tools 4.20
+************************************
+ Install:
+  Install to cstrike
+  add es_load gold to your autoexec.cfg
+************************************
+ Commands:
+  gold - tells player how much gold the have
+  goldshop - opens the goldshop menu
+  goldadmin - opens the goldadmin menu for goldadmins
+************************************
+************************************
+ Files:
+ addons/eventscripts/wcs/addons/gold/es_gold.txt
+ addons/eventscripts/wcs/addons/gold/es_gold_db.txt
+ addons/eventscripts/wcs/addons/gold/es_gold_config_db.txt
+ addons/eventscripts/wcs/addons/gold/es_golddata_db.txt
+ addons/eventscripts/wcs/addons/gold/goldadmin/es_goldadmin.txt
+ addons/eventscripts/wcs/addons/gold/goldadmin/es_goldadmin_db.txt
+ addons/eventscripts/wcs/addons/gold/goldblocks/es_goldblocks.txt
+ addons/eventscripts/wcs/addons/gold/goldblocks/goldspells/es_goldspells.txt
+ addons/eventscripts/wcs/addons/gold/goldblocks/goldevents/es_goldevents.txt
+ addons/eventscripts/wcs/addons/gold/goldshop/es_goldshop.txt
+ addons/eventscripts/wcs/addons/gold/goldshop/es_goldshop_db.txt
+ addons/eventscripts/wcs/addons/gold/goldshop/es_goldshop_cat_db.txt
+************************************
+************************************
+            goldadmin
+************************************
+ to manually create a goldadmin
+ open wcs/addons/gold/goldadmin/es_goldadmin_db.txt
+ paste the admins STEAM_ID over mine
+ replace my name with the admins name
+ edit flags
+************************************
+	"STEAM_0:1:15945857"
+	{
+		"name"		"HOLLIDAY"
+		"GoldIsAdmin"		"1"
+		"goldadmin"		"1"
+		"Give_Gold"		"1"
+		"Take_Gold"		"1"
+		"gold_settings"		"1"
+		"Gold_Items"		"1"
+		"Gold_Admins"		"1"
+	}
+	
+************************************
+            goldshop
+************************************
+      es_goldshop_cat_db.txt
+************************************
+ creates the categories in goldshop
+ add as many categories as you want
+************************************
+
+  "1" //goldshop category number (keep these in order)
+  {
+    "name"  "Enhancements"    //the name of the goldshop category
+    "kills_required"  "0"     //the number of kills required for a player to unlock this category
+  }
+
+************************************
+        es_goldshop_db.txt
+************************************
+ creates the goldshop items
+ add as manu as you want
+************************************
+	"Boots of Speed"    // name of the goldshop item
+	{
+		"name"		      "Boots of Speed"       //name of the gold shop item
+		"description"		"Gain Speed (stacks)"  //description of goldshop item
+		"cost"	 	      "200"                  //amount of gold the item cost
+		"category"		  "1"                    //the goldshop category of the item
+		"max_amount"		"3"                    //the amount of times a player can buy the item per life (resets on player_death)
+		"required"		  "0"                    //the amount of kills required for a a player to unlock this item
+		"block"		      "speed"                //the name of the block that activates this item (located in wcs/addons/gold/goldblocks/es_goldblocks.txt)
+	}
+************************************
+            goldblocks
+************************************
+ each goldshop item has a field called "block"
+ the value specified in the filed "block" is a block located in wcs/addons/gold/goldblocks/es_goldblocks.txt
+ this block will be activated when a player selects the item
+************************************
+ Example:
+         "block"		      "100hp"
+ in es_goldblocks.txt you will find
+************************************
+
+block 100hp
+{
+  es est_healthadd server_var(_popup_userid) 100
+}
+
+************************************
+
+ this is the code that activates when a player selects the item from goldshop
+ for items that take effect in an event (damaging items,respawn ect..) there will be two blocks for the item in goldblocks.txt
+ one that is the titled the same as the value in the fieled "block" (takes effect the second the item is selected)
+ and one that is titled blockname-a (activates in the event the item takes effect)
+************************************
+ Example:
+
+         "block"		      "extra_damage"
+         "description"		"causes extra damage to the player that you hit"
+************************************
+ block extra_damage
+ {
+   es_keysetvalue golddata server_var(gold_steam) attack extra_damage
+ }
+
+ block extra_damagea
+ {
+   es est_damage event_var(attacker) event_var(userid) 10
+   es_tell event_var(attacker) the code in this block has activated
+ }
+************************************
+ for +ability items there will be 3 blocks in es_goldblocks.txt
+ one that is titled the same as the value in the fieled "block" (takes effect the second the item is selected)
+ one that is titled blockname-a (activates when a player presses the +ability key)
+ and one that is titled blockname-b (activates when a player releases the +ability key)
+************************************
+ Example:
+
+         "block"		      "ability_example"
+         "description"		"activates when a player presses the +ability key"
+************************************
+ block ability_example
+ {
+   es_keysetvalue golddata server_var(gold_steam) +ability ability_example
+   es_tell server_var(_popup_userid) bind +ability to activate this item
+ }
+
+ block ability_examplea
+ {
+   es_tell server_var(gold_use) you have pressed +ability
+ }
+ block ability_exampleb
+ {
+   es_tell server_var(gold_use) you have released +ability
+ }
+************************************
+            gold_config
+************************************
+ wcs/addons/gold/es_gold_config_db.txt
+ the settings in gold_settings can be edited from the goldadmin menu ingame
+************************************
+"gold_config"
+{
+	"gold_settings"
+	{
+		"gold_per_kill"		"15"   //how much gold a player receives when killing a player
+		"headshot"		"5"        //how much additional gold a player receives for a headshot
+		"knife"		"5"            //how much additional gold a player receives for a knife kill
+	}
+	"sound"
+	{
+		"download_custom_sounds"		"1"             //make users download a custom sound that plays when a player unlocks a new goldshop item
+		"new_item"		"HOLLIDAY/wcs/addons/gold/promoted.wav"  //a cool sound i found taken from the NES classic RPG game "Dragon Warrior" , used when a player was promoted to the next level
+	
+  }
+}
+**********************************
+**      GoldShop Items          **
+**********************************
+  Boots of Speed
+   Gain a slight speed boost (stacks)
+   Flickering Shadows
+    Invisibility that flickers
+   Sock of the Feather
+    Lower your Gravity (stacks)
+   Blinking Invisibility
+    Invisibility that blinks
+   Long Jump
+    Slightly increase your jumping distance (stacks)
+   Fading Cloack
+    Invisibility that fades in and out
+   Partial Invisibility
+    Partial invisibility
+   Half Armor
+    50 armor
+   Gold Helmet
+    Pretection from Headshots
+   Full Armor
+    100 armor
+   + Clip(Secondary)
+    add 50 ammo to your secondary weapon
+   Padded Armor
+    Prevents Fall Damage
+   + CLip( Clip Primary)
+    add 150 ammo to your primary weapon
+   Spiked Claws-Cleets
+    Slight increase in step size and ability to wallk over objects or up high walls (stacks)
+   Half Potion 
+    50 HP
+   ReSpawn
+    ReSpawn in 3 seconds
+   Full Potion
+    100 HP
+   Reincarnation
+    ReSpawn if you Die
+   Resurrect
+    ReSpawn at the location you were killed
+   Disguise
+    Disguise your self as the enemy team
+   Poison Smoke Grenades
+    Smoke grenades with toxic smoke
+   Fire Grenades
+    Grenades that explode into flames
+   Teleport Flash Bangs
+    Teleport to the location the flash bang detonates
+   Slingshot
+    Use your glock to slingshot around the map
+   FireBall
+    cause 7 additional damage per hit
+   Thunder
+    Shakes the enemy when hit
+   Shock
+    Stuns the enemy when hit
+   Burn and Blind
+    Burns and Blinds the enemy when hit
+   Frost Fire
+    Freezes then burns the enemy when hit
+   Nether Blast
+    impair the enemy when hit
+   Astral Imprisonment
+    Sends the enmy to a Astral Imprisonment for a short time
+   Scope
+    Use a Scope on any weapon (Bind +ability)
+   Jet Pack
+    Bind +ability to Fly
+   Complete Invisibility
+    Bind a key to +ability and hold key to become invisible
+   Force Feild
+    Bind a key to +ability and hold key to activate forcefeild
+   Wall Hack
+    Bind a key to +ability and hold key to activate wall hack
+   Rocket Launcher
+    Bind a key to +ability and hold key untill fully charged to launch a rocket
+   Gravity Gun
+    Bind a key to +ability, Aim at a prop and hold key to pick it up, release key to throw prop causing an explosion

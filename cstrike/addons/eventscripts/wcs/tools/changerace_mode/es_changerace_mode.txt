@@ -1,0 +1,14 @@
+event round_end
+{
+es foreach player wcs_player #all "es wcsgroup get changerace wcs_tmp server_var(wcs_player);if (server_var(wcs_tmp) != 0) then wcs_change_race server_var(wcs_player) server_var(wcs_tmp);if (server_var(wcs_tmp) != 0) then wcsgroup set changerace server_var(wcs_player) 0"
+}
+
+event player_death
+{
+es wcsgroup get changerace wcs_tmp event_var(userid)
+if (server_var(wcs_tmp) != 0) do
+   {
+    es wcs_change_race event_var(userid) server_var(wcs_tmp)
+    es wcsgroup set changerace event_var(userid) 0
+   }
+}

@@ -1,0 +1,29 @@
+
+block spell
+{
+  es_keysetvalue golddata server_var(gold_steam) +ability wcs/addons/gold/goldspells/spell
+  es_tell server_var(_popup_userid) #multi #lightgreen Bind #green +ability #lightgreen to activate Spell
+}
+
+block spella
+{
+  es_give server_var(gold_use) env_Smokestack 
+  es_fire server_var(gold_use) env_smokestack addoutput "targetname spawning"
+  es_fire server_var(gold_use) spawning addoutput "basespread 280"
+  es_fire server_var(gold_use) spawning addoutput "spreadspeed 0"
+  es_fire server_var(gold_use) spawning addoutput "speed 50"
+  es_fire server_var(gold_use) spawning addoutput "rate 800"
+  es_fire server_var(gold_use) spawning addoutput "startsize 11"
+  es_fire server_var(gold_use) spawning addoutput "endsize 13"
+  es_fire server_var(gold_use) spawning addoutput "twist 800"
+  es_fire server_var(gold_use) spawning addoutput "jetlength 966"
+  es_fire server_var(gold_use) spawning addoutput "angles 90 90 90"
+  es_fire server_var(gold_use) spawning addoutput "rendercolor 100 100 220"
+  es_fire server_var(gold_use) spawning addoutput "SmokeMaterial sun\overlay.vmt"
+  es_fire server_var(gold_use) spawning turnon
+}
+
+block spellb
+{
+ es_fire server_var(gold_use) spawning kill
+}

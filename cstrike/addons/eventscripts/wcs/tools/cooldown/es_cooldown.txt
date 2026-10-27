@@ -1,0 +1,5 @@
+event player_spawn
+{
+es wcsgroup set player_ultimate_cooldown event_var(userid) 0
+es wcsgroup set player_ability_cooldown event_var(userid) 0
+}

@@ -1,0 +1,16 @@
+block env_smokestack
+{
+        es_give server_var(wcs_userid) env_Smokestack
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "basespread 10"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "spreadspeed 5"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "speed 1"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "startsize 1"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "endsize 2"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "rate 10"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "jetlength 20"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "twist 0"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "SmokeMaterial effects/bluespark.vmt"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "rendercolor 255 255 255"
+        es_fire server_var(wcs_userid) env_Smokestack addoutput "angles 0 0 0"
+        es_fire server_var(wcs_userid) env_Smokestack turnon
+}

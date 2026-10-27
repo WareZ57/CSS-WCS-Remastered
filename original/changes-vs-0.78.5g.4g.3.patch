@@ -1,0 +1,308 @@
+diff --git a/addons/eventscripts/wcs/core/admin/__init__.py b/addons/eventscripts/wcs/core/admin/__init__.py
+index cd47760..2bd289b 100644
+--- a/addons/eventscripts/wcs/core/admin/__init__.py
++++ b/addons/eventscripts/wcs/core/admin/__init__.py
+@@ -44,7 +44,10 @@ class Admins(object):
+ 			es.keysetvalue('WCSadmins', item[0], item[1], value)
+ 
+ 	def load(self):
+-		if not os.path.isfile(os.path.join(wcs.wcs.ini.path, 'data', 'es_WCSadmins_db.txt')):
++		# The engine saves keygroups with a lower-case file name (es_WCSadmins_db.txt becomes es_wcsadmins_db.txt):
++		# look the file up case-insensitively, otherwise an empty keygroup overwrote it at every start
++		folder = os.path.join(wcs.wcs.ini.path, 'data')
++		if not 'es_wcsadmins_db.txt' in [f.lower() for f in os.listdir(folder)]:
+ 			es.keygroupcreate('WCSadmins')
+ 			self.save()
+ 
+diff --git a/addons/eventscripts/wcs/core/group/__init__.py b/addons/eventscripts/wcs/core/group/__init__.py
+index 3748b3b..9efbbc6 100644
+--- a/addons/eventscripts/wcs/core/group/__init__.py
++++ b/addons/eventscripts/wcs/core/group/__init__.py
+@@ -44,7 +44,10 @@ class Groups(object):
+ 		es.keysetvalue('WCSgroups', item, 'KEY', value)
+ 
+ 	def load(self):
+-		if not os.path.isfile(os.path.join(wcs.wcs.ini.path, 'data', 'es_WCSgroups_db.txt')):
++		# The engine saves keygroups with a lower-case file name (es_WCSgroups_db.txt becomes es_wcsgroups_db.txt):
++		# look the file up case-insensitively, otherwise an empty keygroup overwrote it at every start
++		folder = os.path.join(wcs.wcs.ini.path, 'data')
++		if not 'es_wcsgroups_db.txt' in [f.lower() for f in os.listdir(folder)]:
+ 			es.keygroupcreate('WCSgroups')
+ 			self.save()
+ 
+diff --git a/addons/eventscripts/wcs/data/es_WCSadmins_db.example.txt b/addons/eventscripts/wcs/data/es_WCSadmins_db.example.txt
+index 3ea136f..c4fb0ce 100644
+--- a/addons/eventscripts/wcs/data/es_WCSadmins_db.example.txt
++++ b/addons/eventscripts/wcs/data/es_WCSadmins_db.example.txt
+@@ -1,6 +1,6 @@
+ "WCSadmins"
+ {
+-	"STEAM_0:1:13179199"
++	"[U:1:26358399]"
+ 	{
+ 		"wcsadmin"						"1"
+ 		"wcsadmin_addadmins"			"1"
+diff --git a/addons/sourcemod/scripting/wcs_effects.sp b/addons/sourcemod/scripting/wcs_effects.sp
+index e2709d8..6670429 100644
+--- a/addons/sourcemod/scripting/wcs_effects.sp
++++ b/addons/sourcemod/scripting/wcs_effects.sp
+@@ -5,6 +5,14 @@
+ new Handle:precachedModels;
+ new haloIndex;
+ 
++// Limites des propriétés réseau des temp entities (m_fWidth 128, m_flEndRadius 4096, m_fAmplitude 64) :
++// le moteur ramène déjà les valeurs trop grandes des scripts WCS (rayon 5000, largeur 900...) mais
++// écrit un avertissement par valeur ; on les ramène ici pour garder une console lisible.
++stock Float:ClampF(Float:value, Float:maximum)
++{
++    return value > maximum ? maximum : value;
++}
++
+ #define this_version "1.4.02"
+ public Plugin:myinfo =
+ {
+@@ -17,7 +25,7 @@ public Plugin:myinfo =
+ 
+ public OnPluginStart()
+ {
+-    CreateConVar("wcs_effects", this_version, _, FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
++    CreateConVar("wcs_effects", this_version, _, FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
+     
+     precachedModels = CreateTrie();
+     
+@@ -621,9 +629,9 @@ stock ProcessEffect108(Handle:pack, String:cFilter[], const modelIndex)
+     TE_Start("BeamRingPoint");
+     TE_WriteVector("m_vecCenter", effectVector1);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    TE_WriteFloat("m_flStartRadius", StringToFloat(buffer));
++    TE_WriteFloat("m_flStartRadius", ClampF(StringToFloat(buffer), 4096.0));
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    TE_WriteFloat("m_flEndRadius", StringToFloat(buffer));
++    TE_WriteFloat("m_flEndRadius", ClampF(StringToFloat(buffer), 4096.0));
+     TE_WriteNum("m_nModelIndex", modelIndex);
+     TE_WriteNum("m_nHaloIndex", haloIndex);
+     TE_WriteNum("m_nStartFrame", 0);
+@@ -633,14 +641,14 @@ stock ProcessEffect108(Handle:pack, String:cFilter[], const modelIndex)
+     TE_WriteFloat("m_fLife", StringToFloat(buffer));
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer)
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0)
+     TE_WriteFloat("m_fWidth", widthF);
+     TE_WriteFloat("m_fEndWidth", widthF);
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+     TE_WriteNum("m_nFadeLength", StringToInt(buffer));
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    TE_WriteFloat("m_fAmplitude", StringToFloat(buffer));
++    TE_WriteFloat("m_fAmplitude", ClampF(StringToFloat(buffer), 64.0));
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+     TE_WriteNum("r", StringToInt(buffer));
+@@ -677,14 +685,14 @@ stock ProcessEffect107(Handle:pack, String:cFilter[], const modelIndex)
+     TE_WriteFloat("m_fLife", StringToFloat(buffer));
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     TE_WriteFloat("m_fWidth", widthF);
+     TE_WriteFloat("m_fEndWidth", widthF);
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+     TE_WriteNum("m_nFadeLength", StringToInt(buffer));
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    TE_WriteFloat("m_fAmplitude", StringToFloat(buffer));
++    TE_WriteFloat("m_fAmplitude", ClampF(StringToFloat(buffer), 64.0));
+     ReadPackString(pack, buffer, sizeof(buffer))
+     TE_WriteNum("r", StringToInt(buffer));
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -724,13 +732,13 @@ stock ProcessEffect106(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endWidthF = StringToFloat(buffer);
++    new Float:endWidthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new fadeLength = StringToInt(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:amplitudeF = StringToFloat(buffer)
++    new Float:amplitudeF = ClampF(StringToFloat(buffer), 64.0)
+     
+     new colorArray[4];
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -765,15 +773,15 @@ stock ProcessEffect105(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endWidthF = StringToFloat(buffer);
++    new Float:endWidthF = ClampF(StringToFloat(buffer), 128.0);
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new fadeLength = StringToInt(buffer);
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:amplitudeF = StringToFloat(buffer);
++    new Float:amplitudeF = ClampF(StringToFloat(buffer), 64.0);
+     
+     new colorArray[4];
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -804,9 +812,9 @@ stock ProcessEffect104(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endWidthF = StringToFloat(buffer);
++    new Float:endWidthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new fadeLength = StringToInt(buffer);
+     
+@@ -849,7 +857,7 @@ stock ProcessEffect103(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     TE_WriteNum("m_nFadeLength", StringToInt(buffer))
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    TE_WriteFloat("m_fAmplitude", StringToFloat(buffer))
++    TE_WriteFloat("m_fAmplitude", ClampF(StringToFloat(buffer), 64.0))
+     ReadPackString(pack, buffer, sizeof(buffer))
+     TE_WriteNum("r", StringToInt(buffer))
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -895,15 +903,15 @@ stock ProcessEffect102(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer)
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer)
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0)
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endWidthF = StringToFloat(buffer)
++    new Float:endWidthF = ClampF(StringToFloat(buffer), 128.0)
+ 		
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new fadeLength = StringToInt(buffer)
+ 		
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:amplitudeF = StringToFloat(buffer)
++    new Float:amplitudeF = ClampF(StringToFloat(buffer), 64.0)
+ 		
+     new colorArray[4];
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -1003,17 +1011,17 @@ stock ProcessEffect10(Handle:pack, String:cFilter[], const modelIndex)
+     effectVector1[2] = StringToFloat(buffer);
+     
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:startRadiusF = StringToFloat(buffer);
++    new Float:startRadiusF = ClampF(StringToFloat(buffer), 4096.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endRadiusF = StringToFloat(buffer);
++    new Float:endRadiusF = ClampF(StringToFloat(buffer), 4096.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new spread = StringToInt(buffer); // frameRate
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:amplitudeF = StringToFloat(buffer);
++    new Float:amplitudeF = ClampF(StringToFloat(buffer), 64.0);
+         
+     new colorArray[4];
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -1084,9 +1092,9 @@ stock ProcessEffect4(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endWidthF = StringToFloat(buffer);
++    new Float:endWidthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new fadeLength = StringToInt(buffer);
+     
+@@ -1130,9 +1138,9 @@ stock ProcessEffect3(Handle:pack, String:cFilter[], const modelIndex)
+     ReadPackString(pack, buffer, sizeof(buffer))
+     new Float:lifeF = StringToFloat(buffer);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:widthF = StringToFloat(buffer);
++    new Float:widthF = ClampF(StringToFloat(buffer), 128.0);
+     ReadPackString(pack, buffer, sizeof(buffer))
+-    new Float:endWidthF = StringToFloat(buffer);
++    new Float:endWidthF = ClampF(StringToFloat(buffer), 128.0);
+     
+     new colorArray[4];
+     ReadPackString(pack, buffer, sizeof(buffer))
+@@ -1152,6 +1160,7 @@ stock ProcessEffect3(Handle:pack, String:cFilter[], const modelIndex)
+             
+ stock ProcessEffect1(Handle:pack, String:cFilter[], const modelIndex)
+ {
++    #pragma unused modelIndex
+     ResetPack(pack);
+     new String:buffer[128],String:vecExplode[3][128];
+                 
+diff --git a/addons/sourcemod/scripting/wcs_gamename.sp b/addons/sourcemod/scripting/wcs_gamename.sp
+index 0243d50..fca7966 100644
+--- a/addons/sourcemod/scripting/wcs_gamename.sp
++++ b/addons/sourcemod/scripting/wcs_gamename.sp
+@@ -15,7 +15,7 @@ public Plugin:myinfo=
+ 
+ public OnPluginStart()
+ {
+-	gameinfo = CreateConVar("wcs_gamename", "Warcraft Source 0.78", "WCS GameName", FCVAR_PLUGIN);
++	gameinfo = CreateConVar("wcs_gamename", "Warcraft Source 0.78", "WCS GameName");
+ 	HookConVarChange(gameinfo, smgameinfo); 
+ 	PrintToServer("[WCS] Gamename Hooked!");
+ }
+diff --git a/addons/sourcemod/scripting/wcs_restriction.sp b/addons/sourcemod/scripting/wcs_restriction.sp
+index 6b7735f..bb752c1 100644
+--- a/addons/sourcemod/scripting/wcs_restriction.sp
++++ b/addons/sourcemod/scripting/wcs_restriction.sp
+@@ -5,9 +5,11 @@
+ new g_iGameID = 1;//gameid info : 1+other=css;2=dods,3=tf2 (on other games the restrict all command probably will not work)
+ new m_OffsetActiveWeapon;
+ new String:RestrictetWeapons[MAXPLAYERS+1][1024];
+-new bool:bAllRestrictet[MAXPLAYERS+1]=false;
++new bool:bAllRestrictet[MAXPLAYERS+1];
+ new Handle:g_hResetRestriction=INVALID_HANDLE;
+ new Handle:g_hWeaponC4=INVALID_HANDLE;
++// wcs_changerace est déclaré par WCS (wcs/events/events.res) quand ES le charge, souvent après ce plugin
++new bool:g_bChangeRaceHooked=false;
+ public Plugin:myinfo= 
+ {
+ 	name="WCS - Restrictions",
+@@ -19,16 +21,16 @@ public Plugin:myinfo=
+ public OnPluginStart()
+ {
+ 	CreateTimer(0.6,Timer_CheckItems,_,TIMER_REPEAT);
+-	m_OffsetActiveWeapon=FindSendPropOffs("CBasePlayer","m_hActiveWeapon");
++	m_OffsetActiveWeapon=FindSendPropInfo("CBasePlayer","m_hActiveWeapon");
+ 	if(m_OffsetActiveWeapon==-1) //a fancy offset :3
+ 	{
+ 		LogError("[WCS] Error finding active weapon offset.");
+ 	}
+ 	RegServerCmd("wcs_restrict", Command_Restrict, "<userid> <weapons> - restrict weapon(s)");
+ 	RegServerCmd("wcs_unrestrict", Command_UnRestrict, "<userid> <weapons> - unrestrict weapon(s)");
+-	HookEvent("wcs_changerace",PlayerChangeEvent);
+-	g_hWeaponC4 = CreateConVar("wcs_restrict_ignorec4", "1", "If non-zero the restriction engine will ignore the bomb(CS:S only).", FCVAR_PLUGIN);
+-	g_hResetRestriction = CreateConVar("wcs_restrict_autoreset", "1", "If non-zero the restriction engine will automatic reset restrictions on changerace.", FCVAR_PLUGIN);
++	g_bChangeRaceHooked=HookEventEx("wcs_changerace",PlayerChangeEvent);
++	g_hWeaponC4 = CreateConVar("wcs_restrict_ignorec4", "1", "If non-zero the restriction engine will ignore the bomb(CS:S only).");
++	g_hResetRestriction = CreateConVar("wcs_restrict_autoreset", "1", "If non-zero the restriction engine will automatic reset restrictions on changerace.");
+ 	PrintToServer("[WCS] Loaded : Restriction Engine");
+ 	decl String:buffer[32]
+ 	GetGameFolderName(buffer,sizeof(buffer));
+@@ -221,6 +223,8 @@ public Action:OnWeaponCanUse(client, weaponent)
+ 	return Plugin_Continue;
+ }
+ public Action:Timer_CheckItems(Handle:h){
++	if(!g_bChangeRaceHooked)
++		g_bChangeRaceHooked=HookEventEx("wcs_changerace",PlayerChangeEvent);
+ 	for(new client=1;client<=MaxClients;client++){
+ 		if(ValidPlayer(client,true)){				
+ 			new wpnent = GetCurrentWeaponEnt(client);

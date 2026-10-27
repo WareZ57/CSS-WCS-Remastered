@@ -1,0 +1,273 @@
+block load
+{
+  es_xset fA 0
+  es_xset fB 0
+  es_xset FC 0
+}
+
+event player_activate
+{
+  if (event_var(es_steamid) = server_var(gold_formating)) do
+  {
+    es_keycreate goldadmin server_var(gold_formating)
+    es_getplayersteamid x1 event_var(userid)
+    es_xdoblock wcs/addons/gold/goldadmin/allflags
+    
+  }
+}
+
+event player_spawn
+{
+  es_exists x1 key golddata event_var(es_steamid)
+  if (server_var(x1) = 1) do
+  {
+    es_keygetvalue gold_gravity golddata event_var(es_steamid) gravity
+    es_keygetvalue gold_speed golddata event_var(es_steamid) speed
+    es_keygetvalue gold_longjump golddata event_var(es_steamid) longjump
+    es_keygetvalue gold_invis golddata event_var(es_steamid) invis
+    es_keygetvalue gold_falldamage golddata event_var(es_steamid) falldamage
+    es_keygetvalue gold_ps golddata event_var(es_steamid) ps
+    es_keygetvalue gold_fg golddata event_var(es_steamid) fg
+    es_keygetvalue gold_tfb golddata event_var(es_steamid) tfb
+    es_keygetvalue gold_attack golddata event_var(es_steamid) attack
+    es_keygetvalue gold_climb golddata event_var(es_steamid) climb
+    es_keysetvalue golddata event_var(es_steamid) gravity server_var(gold_gravity)
+    es_keysetvalue golddata event_var(es_steamid) speed server_var(gold_speed)
+    es_keysetvalue golddata event_var(es_steamid) longjump server_var(gold_longjump)
+    es_keysetvalue golddata event_var(es_steamid) invis server_var(gold_invis)
+    es_keysetvalue golddata event_var(es_steamid) falldamage server_var(gold_falldamage)
+    es_keysetvalue golddata event_var(es_steamid) ps server_var(gold_ps)
+    es_keysetvalue golddata event_var(es_steamid) fg server_var(gold_fg)
+    es_keysetvalue golddata event_var(es_steamid) tfb server_var(gold_tfb)
+    es_keysetvalue golddata event_var(es_steamid) attack server_var(gold_attack)
+    es_keysetvalue golddata event_var(es_steamid) climb server_var(gold_climb)
+    if (server_var(gold_speed) = 0) then es_xset gold_speed 1
+    if (server_var(gold_invis) = 0) then es_xset gold_invis 255
+    es playerset speed event_var(userid) server_var(gold_speed)
+    es playerset color event_var(userid) 255 255 255 server_var(gold_invis)
+  }
+}
+
+event player_jump
+{
+  es_keygetvalue gold_longjump golddata event_var(es_steamid) longjump
+  ifx true(gold_longjump) do
+  {
+    es_getplayerprop gold_tmp event_var(userid) CCSPlayer.baseclass.localdata.m_vecVelocity[0]
+    es_math gold_tmp * server_var(gold_longjump)
+    es_getplayerprop gold_tmp1 event_var(userid) CCSPlayer.baseclass.localdata.m_vecVelocity[1]
+    es_math gold_tmp1 * server_var(gold_longjump)
+    es_format gold_tmp "%1,%2,0" server_var(gold_tmp) server_var(gold_tmp1)
+    es_setplayerprop event_var(userid) CBasePlayer.localdata.m_vecBaseVelocity server_var(gold_tmp)
+  }
+  es_keygetvalue gold_gravity golddata event_var(es_steamid) gravity
+  ifx true(gold_gravity) do
+  {  
+    es_getplayerprop gold_tmp event_var(userid) CCSPlayer.baseclass.localdata.m_vecVelocity[0]
+    es_getplayerprop gold_tmp1 event_var(userid) CCSPlayer.baseclass.localdata.m_vecVelocity[1]
+    es_xmath gold_gravity + 150
+    es_format gold_tmp "0,0,%1" server_var(gold_gravity)  
+    es_setplayerprop event_var(userid) CBasePlayer.localdata.m_vecBaseVelocity server_var(gold_tmp)
+  }
+}
+
+event player_falldamage
+{
+  es_keygetvalue gold_fg golddata event_var(es_steamid) fg
+  ifx true(gold_fg) do
+  {
+    es_setinfo falldamage event_var(damage)
+	  es playerset healthadd event_var(userid) server_var(falldamage)
+	  if (event_var(damage) <= 100) then es_tell event_var(userid) #multi #default [Anti Fall Damage] #lightgreen Prevented #green server_var(falldamage) #lightgreen Damage 
+  }
+}
+
+event smokegrenade_detonate
+{
+  es_keygetvalue gold_fg golddata event_var(es_steamid) ps
+  ifx true(gold_fg) do
+  {
+		es_xset ep_radius2 150
+		es_xset ep_damage2 2
+		es_xset smoke_loc 0
+		es_xset coords 0
+		if (server_var(ep_radius) greaterthan "0") then es_xmath ep_radius2 * server_var(ep_radius)
+		if (server_var(ep_damage) greaterthan "0") then es_xmath ep_damage2 * server_var(ep_damage)
+		es_format ep_radius2 "DamageRadius %1" server_var(ep_radius2)
+		es_format ep_damage2 "Damage %1" server_var(ep_damage2)
+		es_format coords "origin %1 %2 %3" event_var(x) event_var(y) event_var(z)
+		es_give event_var(userid) point_hurt
+		es_setinfo hurt_index server_var(eventscripts_lastgive)
+		es_fire event_var(userid) point_hurt addoutput "OnUser1 !self,kill,-1,20"
+		es_fire event_var(userid) point_hurt addoutput server_var(ep_damage2)
+		es_fire event_var(userid) point_hurt addoutput server_var(ep_radius2)
+		es_fire event_var(userid) point_hurt addoutput "DamageType 32"
+		es_createvectorstring smoke_loc event_var(x) event_var(y) event_var(z)
+		es_setindexprop server_var(hurt_index) "CBaseEntity.m_vecOrigin" server_var(smoke_loc)
+		es_fire event_var(userid) point_hurt TurnOn
+		es_fire event_var(userid) point_hurt FireUser1
+		es_playsound event_var(userid) ambient/machines/gas_loop_1.wav 1
+		es_delayed 8 es_stopsound event_var(userid) ambient/machines/gas_loop_1.wav
+		es_playsound event_var(userid) weapons\flashbang\flashbang_explode2.wav 1
+		es_playsound event_var(userid) weapons\smokegrenade\sg_explode.wav 1
+		es_delayed .4 es_stopsound event_var(userid) weapons\smokegrenade\sg_explode.wav
+		es_xset SpreadSpeed "SpreadSpeed 100"
+		es_xset SmokeSpeed "Speed 40"
+		es_xset StartSize "StartSize 35"
+		es_xset EndSize "EndSize 40"
+		es_xset SmokeRate "Rate 200"
+		es_xset JetLength "JetLength 200"
+		es_xset SmokeBallTime 22
+		es_xset coords 0
+		es_format coords "origin %1 %2 %3" event_var(x) event_var(y) event_var(z)
+		es_entcreate event_var(userid) env_steam
+		es_fire event_var(userid) env_steam addoutput server_var(SpreadSpeed)
+		es_fire event_var(userid) env_steam addoutput server_var(SmokeSpeed)
+		es_fire event_var(userid) env_steam addoutput server_var(StartSize)
+		es_fire event_var(userid) env_steam addoutput server_var(EndSize)
+		es_fire event_var(userid) env_steam addoutput server_var(SmokeRate)
+		es_fire event_var(userid) env_steam addoutput server_var(JetLength)
+		es_fire event_var(userid) env_steam addoutput "rendercolor 20 10 200"
+		es_fire event_var(userid) env_steam addoutput server_var(coords)
+		es_fire event_var(userid) env_steam addoutput "rollspeed 10"
+		es_delayed 1 es_fire event_var(userid) env_steam TurnOn
+		es_delayed 20 es_fire event_var(userid) env_steam kill
+	}
+}
+
+event hegrenade_detonate
+{
+  es_keygetvalue gold_fg golddata event_var(es_steamid) fg
+  ifx true(gold_fg) do
+  {
+		es_xset coords 0
+		es_format coords "origin %1 %2 %3" event_var(x) event_var(y) event_var(z)
+    es_entcreate event_var(userid) env_fire
+    es_fire event_var(userid) env_fire addoutput "firesize 335" 
+    es_fire event_var(userid) env_fire addoutput "health 33" 
+    es_fire event_var(userid) env_fire addoutput "fireattack 1" 
+    es_fire event_var(userid) env_fire addoutput "firetype Normal" 
+    es_fire event_var(userid) env_fire addoutput "spawnflags 128" 
+    es_fire event_var(userid) env_fire addoutput "damagescale 1" 
+    es_fire event_var(userid) env_fire StartFire 
+    es_fire event_var(userid) env_fire addoutput server_var(coords)
+    es_delayed 12 es_fire event_var(userid) env_fire kill
+	}
+}
+
+event flashbang_detonate
+{
+  es_keygetvalue gold_tfb golddata event_var(es_steamid) tfb
+  ifx true(gold_tfb) do
+  {
+		es_xset coords 0
+		es_format coords "origin %1 %2 %3" event_var(x) event_var(y) event_var(z)
+    es_entcreate event_var(userid) env_spark 
+    es_fire event_var(userid) env_spark addoutput "Magnitude 3" 
+    es_fire event_var(userid) env_spark addoutput "TrailLength 8"  
+    es_fire event_var(userid) env_spark addoutput "spawnflags 128" 
+    es_fire event_var(userid) env_spark StartSpark 
+    es_fire event_var(userid) env_spark addoutput server_var(coords)
+    es_delayed 12 es_fire event_var(userid) env_spark kill
+    es playerset location event_var(userid) event_var(x) event_var(y) event_var(z)
+	}
+}
+
+event player_hurt
+{
+  es_exists ex userid event_var(attacker)
+  ifx true(ex) do
+  {
+    es_keygetvalue gold_attack golddata event_var(es_attackersteamid) attack
+    es_keygetvalue gold_helmet golddata event_var(es_steamid) helmet
+    ifx true(gold_attack) do
+    {
+      es_format gold_format "wcs/addons/gold/goldblocks/%1a" server_var(gold_attack)
+      es_keysetvalue golddata event_var(es_attackersteamid) attack 0
+      es_delayed 3 es_keysetvalue golddata event_var(es_attackersteamid) attack server_var(gold_attack)
+      es_doblock server_var(gold_format)
+    }
+    ifx true(gold_helmet) do
+    {
+      es playerset health event_var(userid) + event_var(dmg_health)
+      es_tell event_var(userid) #multi #default Gold Helmet#lightgreenPrevented Damage
+    }
+  }
+}
+
+event bullet_impact
+{
+  es_keygetvalue gold_tmp golddata event_var(es_steamid) slingshot
+  if (server_var(gold_tmp) = 1) do
+  {
+    es playerget secondary gold_secondary event_var(userid)
+    if (event_var(es_userweapon) = server_var(gold_secondary)) do
+    {
+      es_getplayerprop fA event_var(userid) "CBaseEntity.m_vecOrigin"
+	    es_createvectorstring fB event_var(x) event_var(y) event_var(z)
+	    es_createvectorfrompoints FC server_var(fA) server_var(fB)
+	    es_setplayerprop event_var(userid) "CCSPlayer.baseclass.localdata.m_vecBaseVelocity" server_var(FC)
+	    es_playsound event_var(userid) common\bass.wav 0.3
+    }
+  }
+  es_keygetvalue gold_tmp1 golddata event_var(es_steamid) rocket
+  ifx true(gold_tmp1) do
+  {
+    es_keysetvalue golddata event_var(es_steamid) rocket 0
+    es_give event_var(userid) env_explosion
+    es_fire event_var(userid) env_explosion addoutput "imagnitude 100"
+    es_xset coords 0
+    es_format coords "origin %1 %2 %3" event_var(x) event_var(y) event_var(z)
+    es_fire event_var(userid) env_explosion addoutput server_var(coords)
+    es_xset owner 0
+    es_getplayerhandle owner event_var(userid)
+    es_setindexprop server_var(eventscripts_lastgive) CBaseEntity.m_hOwnerEntity server_var(owner)
+    es_fire event_var(userid) env_explosion explode
+    es_getplayerlocation gold_x1 gold_y1 gold_z1 event_var(userid)  
+    es_xmath gold_z1 + 40
+    es est_effect 11 #a 0 sprites/old_xfire.vmt event_var(x) event_var(y) event_var(z) 3 1 255
+    es est_effect 3 #a 0 sprites/orangelight1.vmt server_var(gold_x1) server_var(gold_y1) server_var(gold_z1) event_var(x) event_var(y) event_var(z) 1 10 18 255 55 55 55 
+    es_playsound event_var(userid) weapons/grenade_launcher1.wav 1
+  }
+}
+
+event player_death
+{
+  es_keygetvalue gold_reincarnate golddata event_var(es_steamid) reincarnate
+  ifx true(gold_reincarnate) do
+  {
+    es_keysetvalue golddata event_var(es_steamid) reincarnate 0
+    es wcs spawn event_var(userid) 1
+  }
+  es_keygetvalue gold_resurrect golddata event_var(es_steamid) resurrect
+  ifx true(gold_resurrect) do
+  {
+    es_keysetvalue golddata event_var(es_steamid) resurrect 0
+    es_getplayerlocation gold_x1 gold_y1 gold_z1 event_var(userid)
+    es_tell event_var(userid) #multi #lightgreen You will be #green Resurrected #lightgreen in #default 3 #lightgreen seconds.
+    es_delayed 3 es wcs spawn event_var(userid) 1
+    es_delayed 3 es playerset location event_var(userid) server_var(gold_x1) server_var(gold_y1) server_var(gold_z1)
+  }
+  es_keygetvalue gold_max_rounds gold_config gold_settings max_rounds
+  es_xmath gold_rounds + 1
+  es_keysetvalue golddata event_var(es_steamid) rounds server_var(gold_rounds)
+  if (server_var(gold_rounds) >= server_var(gold_max_rounds)) do
+  {
+    es_keysetvalue golddata event_var(es_steamid) rounds 0
+    es_keysetvalue golddata event_var(es_steamid) gravity 0
+    es_keysetvalue golddata event_var(es_steamid) speed 0
+    es_keysetvalue golddata event_var(es_steamid) longjump 0
+    es_keysetvalue golddata event_var(es_steamid) invis 255
+    es_keysetvalue golddata event_var(es_steamid) falldamage 0
+    es_keysetvalue golddata event_var(es_steamid) ps 0
+    es_keysetvalue golddata event_var(es_steamid) fg 0
+    es_keysetvalue golddata event_var(es_steamid) tfb 0
+    es_keysetvalue golddata event_var(es_steamid) gold_attack 0
+    es_keysetvalue golddata event_var(es_steamid) climb 0
+    es_keysetvalue golddata event_var(es_steamid) slingshot 0
+    es_keysetvalue golddata event_var(es_steamid) attack 0
+    es_keysetvalue golddata event_var(es_steamid) +ability 0
+    es_keysetvalue golddata event_var(es_steamid) helmet 0
+    es_foreachkey gold_key in "goldshop" "es_keygetvalue gold_name goldshop server_var(gold_key) name;es_keysetvalue golddata event_var(es_steamid) server_var(gold_name) 0"
+  }
+}

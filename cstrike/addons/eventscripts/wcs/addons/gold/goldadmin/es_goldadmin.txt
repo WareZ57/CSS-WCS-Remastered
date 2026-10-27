@@ -1,0 +1,485 @@
+block load
+{
+  es_xset gold_userid 0
+  es_xset gold_steam 0
+  es_xset gold_key 0
+  es_xset gold_exists 0
+  es_xset gold_name 0
+  es_xset goldplayer 0
+  es_xset gold_give 0
+  es_xset gold_take 0
+  es_xset gold_settings 0
+  es_xset gold_items 0
+  es_xset gold_admins 0
+  es_xset x1 0
+  es_xset x2 0
+  es_xset x3 0
+  es_xset x4 0
+  es_xset gold_GoldIsAdmin 0
+  popup create goldadmin
+  popup addline goldadmin "   Gold Admin"
+  popup addline goldadmin "          "
+  popup addline goldadmin "->1.Give/Take Gold"
+  popup addline goldadmin "->2.Gold Settings"
+  popup addline goldadmin "->3.Gold Admins"
+  popup addline goldadmin "->0.Exit"
+  popup submenu goldadmin 2 goldsettings
+  popup menuselect goldadmin wcs/addons/gold/goldadmin/goldadminmenu
+  popup create goldsettings
+  popup addline goldsettings "Gold Settings"
+  popup addline goldsettings "          "
+  popup addline goldsettings "->1.Gold"
+  popup addline goldsettings "->2.Gold Shop"
+  popup addline goldsettings "          "
+  //popup addline goldsettings "->3.Save Your Settings"
+  popup addline goldsettings "->8.Back"
+  popup addline goldsettings "->0.Exit"
+  popup submenu goldsettings 8 goldadmin
+  popup menuselect goldsettings wcs/addons/gold/goldadmin/goldsettings
+  popup create goldids
+	popup addline goldids " -Gold Admin ID's- "
+  popup addline goldids "          "	
+	popup addline goldids "->1.Create Admin"
+	popup addline goldids "->2.Update Admin"
+	popup addline goldids "->3.Delete Admin"
+	popup addline goldids "->8.Back"
+	popup addline goldids "->0.Exit"
+	popup menuselect goldids wcs/addons/gold/goldadmin/goldids
+  es_keygroupcreate goldadmin |wcs/addons/gold/goldadmin
+  es_keygroupload goldadmin |wcs/addons/gold/goldadmin
+  es_xregclientcmd goldadmin wcs/addons/gold/goldadmin/goldadmin goldadmin
+  es_xregsaycmd goldadmin wcs/addons/gold/goldadmin/goldadmin goldadmin
+}
+
+block unload
+{
+  es_keygroupdelete goldadmin
+}
+
+block goldadmin
+{
+  es_xgetcmduserid gold_userid
+  es_getplayersteamid gold_steam server_var(gold_userid)
+  es_exists gold_exists key goldadmin server_var(gold_steam)
+  ifx true(gold_exists) do 
+  { 
+    es popup isqueued goldadmin x1 server_var(gold_userid)
+    if (server_var(x1) = 0) then es popup send goldadmin server_var(gold_userid)
+  }
+  es_xelse do
+  {
+    es_tell server_var(gold_userid) #green You are not a Gold Admin
+    es_playsound server_var(gold_userid) vo/citadel/br_laugh01.wav 1 server_var(gold_userid) 1
+  }
+}
+
+block goldids
+{
+	if (server_var(_popup_choice) == 1) do
+	{                                         
+    popup easymenu Gold_Admin gold_userid wcs/addons/gold/goldadmin/adminids
+    es foreach player gold_key #all "es_getplayername gold_name server_var(gold_key);es popup addoption Gold_Admin server_var(gold_key) server_var(gold_name) 1"
+    es popup send Gold_Admin server_var(_popup_userid)
+	}
+	if (server_var(_popup_choice) == 2) do
+	{
+    popup easymenu Gold_Admin2 x1 wcs/addons/gold/goldadmin/goldflags
+    es_foreachkey gold_key in goldadmin "es_keygetvalue gold_name goldadmin server_var(gold_key) name;es popup addoption Gold_Admin2 server_var(gold_key) server_var(gold_name) 1"
+    es popup send Gold_Admin2 server_var(_popup_userid)
+	}
+	if (server_var(_popup_choice) == 3) do
+	{
+    popup easymenu Gold_Admin3 gold_userid wcs/addons/gold/goldadmin/adminids2
+    es_foreachkey gold_key in goldadmin "es_keygetvalue gold_name goldadmin server_var(gold_key) name;es popup addoption Gold_Admin3 server_var(gold_key) server_var(gold_name) 1"
+    es popup send Gold_Admin3 server_var(_popup_userid)
+	}
+	if (server_var(_popup_choice) == 8) do
+	{
+		es popup send goldadmin server_var(_popup_userid)
+	}
+}
+
+block adminids
+{
+	es_getplayersteamid x1 server_var(gold_userid)
+	es_getplayername x2 server_var(gold_userid)
+	es_keycreate goldadmin server_var(x1)
+	es_keysetvalue goldadmin server_var(x1) name server_var(x2)
+	es_keysetvalue goldadmin server_var(x1) GoldIsAdmin 1
+	es_xdoblock wcs/addons/gold/goldadmin/goldflags
+}
+
+block adminids2
+{
+  popup create deladmin
+  popup addlinef deladmin "Delete %1 's Admin" gold_name
+  popup addline deladmin "->1.Confirm"
+  popup addline deladmin "->2.Cancel"
+  popup menuselect deladmin wcs/addons/gold/goldadmin/deladmin
+  es popup send deladmin server_var(_popup_userid)
+}
+
+block deladmin
+{
+  if (server_var(_popup_choice) == 1) do
+  {
+    es_keydelete goldadmin server_var(gold_userid)
+  }
+  if (server_var(_popup_choice) == 2) do
+  {
+    es popup send goldadmin server_var(_popup_userid)
+  }
+}
+
+block goldflags
+{
+  es_keygetvalue x2 goldadmin server_var(x1) "name"
+	es_keygetvalue x3 goldadmin server_var(x1) "GoldAdmin"
+	es_keygetvalue gold_give goldadmin server_var(x1) "Give_Gold"
+	es_keygetvalue gold_take goldadmin server_var(x1) "Take_Gold"
+  es_keygetvalue gold_settings goldadmin server_var(x1) "Gold_Settings"
+  es_keygetvalue gold_items goldadmin server_var(x1) "Gold_Items"
+  es_keygetvalue gold_admins goldadmin server_var(x1) "Gold_Admins"
+  popup create goldflags
+	popup addlinef goldflags "GoldAdmin Flags for %1" x2
+	popup addline goldflags "------------------------"
+	popup addlinef goldflags "->1.Gold Admin %1" x3
+	popup addlinef goldflags "->2.Give Gold %1" gold_give
+	popup addlinef goldflags "->3.Take Gold %1" gold_take
+	popup addlinef goldflags "->4.Gold Settings %1" gold_settings
+	popup addlinef goldflags "->5.Gold Items %1" gold_items
+	popup addlinef goldflags "->6.Gold Admins %1" gold_admins
+	popup addline goldflags "------------------------"
+	popup addline goldflags "->8.Back"
+	popup addline goldflags "->0.Exit"
+	popup submenu goldflags 8 goldadmin
+	popup menuselect goldflags  wcs/addons/gold/goldadmin/adminflags
+	popup menuvalue goldflags x3 1 GoldAdmin
+	popup menuvalue goldflags x3 2 Give_Gold
+	popup menuvalue goldflags x3 3 Take_Gold
+	popup menuvalue goldflags x3 4 Gold_Settings
+	popup menuvalue goldflags x3 5 Gold_Items
+	popup menuvalue goldflags x3 6 Gold_Admins
+	es popup send goldflags server_var(_popup_userid)
+}
+
+block goldadminmenu
+{
+  if (server_var(_popup_choice) == 1) do
+  {
+    es_getplayersteamid gold_steam server_var(_popup_userid)
+    es_keygetvalue gold_give goldadmin server_var(gold_steam) Give_Gold
+    ifx true(gold_give) do
+	  {
+      popup easymenu goldplayer gold_userid wcs/addons/gold/goldadmin/usergold
+      es foreach player gold_key #all "es_getplayername gold_name server_var(gold_key);es popup addoption goldplayer server_var(gold_key) server_var(gold_name) 1"
+      es popup send goldplayer server_var(_popup_userid)
+    }
+    es_xelse do
+    {
+     	es usermsg hudhint server_var(_popup_userid) Option Disabled
+    }
+  }
+  if (server_var(_popup_choice) == 3) do
+  {
+    es_keygetvalue gold_admins goldadmin server_var(gold_steam) Gold_Admins
+    ifx true(gold_admins) do
+	  {
+      es popup send goldids server_var(gold_userid)
+    }
+    es_xelse do
+    {
+      es usermsg hudhint server_var(_popup_userid) Option Disabled
+    }
+  }
+  if (server_var(_popup_choice) == 8) do
+  {
+    es popup send goldadmin server_var(_popup_userid)
+  }
+}
+
+block golditems
+{
+  es_format gold_menu "Select an Item" 
+  es popup easymenu server_var(gold_menu) gold_item wcs/addons/gold/goldadmin/golditem
+  es_xforeachkey gold_key in "goldshop" "es_xdoblock wcs/addons/gold/goldadmin/golds"
+  es popup send server_var(gold_menu) server_var(_popup_userid)
+}
+
+block golds
+{
+  es_keygetvalue gold_tmp goldshop server_var(gold_key) name
+  es_keygetvalue gold_cost goldshop server_var(gold_key) cost
+  es_keygetvalue gold_required goldshop server_var(gold_key) required
+  es_keygetvalue gold_block goldshop server_var(gold_key) block
+  es_format gold_format "%1 - %2 G" server_var(gold_tmp) server_var(gold_cost)
+  es popup addoption server_var(gold_menu) server_var(gold_key) server_var(gold_format) 1
+}
+
+block golditem
+{
+  es_keygetvalue gold_cost goldshop server_var(gold_item) cost
+  es_keygetvalue gold_max_amount goldshop server_var(gold_item) max_amount
+  es popup create server_var(gold_item)
+  es popup addlinef server_var(gold_item) "%1" gold_item
+  es popup addline server_var(gold_item) "____________"
+  es popup addlinef server_var(gold_item) "Gold : %1" gold_cost
+  es popup addline server_var(gold_item) "->1.     +"
+  es popup addline server_var(gold_item) "->2.     -"
+  es popup addline server_var(gold_item) "____________"
+  es popup addlinef server_var(gold_item) "Kills : %1" gold_max_amount
+  es popup addline server_var(gold_item) "->3.     +"
+  es popup addline server_var(gold_item) "->4.     -"
+  es popup addline server_var(gold_item) "____________"
+  es popup addline server_var(gold_item) "->8.Back"
+  es popup addline server_var(gold_item) "->0.Exit"
+  es popup menuselect server_var(gold_item) wcs/addons/gold/goldadmin/goldprice
+  es popup send server_var(gold_item) server_var(_popup_userid)
+}
+
+block goldprice
+{
+  if (server_var(_popup_choice) == 1) do
+	{
+    es_keygetvalue gold_cost goldshop server_var(gold_item) cost
+    es_xmath gold_cost + 10
+    es_keysetvalue goldshop server_var(gold_item) cost server_var(gold_cost)
+    es_xdoblock wcs/addons/gold/goldadmin/golditem
+	}
+  if (server_var(_popup_choice) == 2) do
+	{
+    es_keygetvalue gold_cost goldshop server_var(gold_item) cost
+    es_xmath gold_cost - 10
+    es_keysetvalue goldshop server_var(gold_item) cost server_var(gold_cost)
+    es_xdoblock wcs/addons/gold/goldadmin/golditem
+	}
+  if (server_var(_popup_choice) == 3) do
+	{
+    es_keygetvalue gold_max_amount goldshop server_var(gold_item) max_amount
+    es_xmath gold_max_amount + 5
+    es_keysetvalue goldshop server_var(gold_item) max_amount server_var(gold_max_amount)
+    es_xdoblock wcs/addons/gold/goldadmin/golditem
+	}
+  if (server_var(_popup_choice) == 4) do
+	{
+    es_keygetvalue gold_max_amount goldshop server_var(gold_item) max_amount
+    es_xmath gold_max_amount - 5
+    es_keysetvalue goldshop server_var(gold_item) max_amount server_var(gold_max_amount)
+    es_xdoblock wcs/addons/gold/goldadmin/golditem
+	}
+  if (server_var(_popup_choice) == 8) do
+	{
+    es popup send goldadmin server_var(_popup_userid)
+  }
+}
+
+block allflags
+{
+  es_keysetvalue goldadmin server_var(x1) Give_Gold 1
+  es_keysetvalue goldadmin server_var(x1) Gold_Settings 1
+  es_keysetvalue goldadmin server_var(x1) Gold_Items 1
+  es_keysetvalue goldadmin server_var(x1) Gold_Admins 1
+  es_keysetvalue goldadmin server_var(x1) GoldAdmin 1
+  es_keysetvalue goldadmin server_var(x1) GoldIsAdmin 1
+  es_keygroupsave goldadmin |wcs/addons/gold/goldadmin
+}
+
+block adminflags
+{
+		if (server_var(_popup_choice) <= 6) do
+		{
+      es_keygetvalue x4 goldadmin server_var(x1) server_var(x3)
+			if (server_var(x4) = 0) then es_keysetvalue goldadmin server_var(x1) server_var(x3) 1
+			if (server_var(x4) = 1) then es_keysetvalue goldadmin server_var(x1) server_var(x3) 0
+			es_xkeygroupsave goldadmin |wcs/addons/gold/goldadmin
+			es_xdoblock wcs/addons/gold/goldadmin/goldflags
+		}
+}
+
+block goldsettings
+{
+	es_getplayersteamid gold_steam server_var(_popup_userid)
+  es_keygetvalue gold_settings goldadmin server_var(gold_steam) Gold_Settings
+  es_keygetvalue gold_items goldadmin server_var(gold_steam) Gold_Items
+  if (server_var(_popup_choice) == 1) do
+	{
+	  ifx true(gold_settings) do
+    {
+      es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+	  }
+	  es_xelse do
+	  {
+      es usermsg hudhint server_var(_popup_userid) Option Disabled
+    }
+	}
+  if (server_var(_popup_choice) == 2) do
+	{
+    ifx true(gold_items) do
+    {
+      es_xdoblock wcs/addons/gold/goldadmin/golditems
+	  }
+	  es_xelse do
+	  {
+      es usermsg hudhint server_var(_popup_userid) Option Disabled
+    }
+	}
+  if (server_var(_popup_choice) == 3) do
+	{
+    es_keygroupsave gold_config |wcs/addons/gold
+    es_keygroupsave goldshop |wcs/addons/gold/goldshop
+	}
+}
+	
+block goldvalues
+{
+  es_xkeygetvalue rand_gold gold_config gold_settings gold_per_kill
+  es_xkeygetvalue gold_headshot gold_config gold_settings headshot
+  es_xkeygetvalue gold_knife gold_config gold_settings knife
+  popup create goldvalues
+  popup addline goldvalues "Gold "
+  popup addline goldvalues "         "
+  popup addlinef goldvalues "Gold Per Kill :%1" rand_gold
+  popup addline goldvalues "-----------"
+  popup addline goldvalues "->1.Raise"
+  popup addline goldvalues "->2.Lower"
+  popup addline goldvalues "-----------"
+  popup addlinef goldvalues "Gold Per HeadShot :%1" gold_headshot
+  popup addline goldvalues "-----------"
+  popup addline goldvalues "->3.Raise"
+  popup addline goldvalues "->4.Lower"
+  popup addline goldvalues "-----------"
+  popup addlinef goldvalues "Gold Per Knife Kill :%1" gold_knife
+  popup addline goldvalues "-----------"
+  popup addline goldvalues "->5.Raise"
+  popup addline goldvalues "->6.Lower"
+  popup addline goldvalues "-----------"
+  popup addline goldvalues "->8.Back"
+  popup addline goldvalues "-----------"
+  popup addline goldvalues "->0.Cancle"
+  popup submenu goldvalues 8 goldsettings
+  popup menuselect goldvalues wcs/addons/gold/goldadmin/goldconfig
+  es popup send goldvalues server_var(_popup_userid)
+}
+
+block usergold
+{
+  es_getplayersteamid gold_steam server_var(gold_userid)
+  es_getplayername gold_name server_var(gold_userid)
+  es_keygetvalue curgold gold server_var(gold_steam) gold
+  popup create managegold
+  popup addlinef managegold "%1 's Gold" gold_name
+  popup addlinef managegold "%1" curgold
+  popup addline managegold "->1.Give Gold"
+  popup addline managegold "->2.Take Gold"
+  popup addline managegold "->3.Give 5000 Gold"
+  popup addline managegold "->4.Take 5000 Gold"
+  popup addline managegold "->5.Take all Gold"
+  popup addline managegold "->8.Back"
+  popup submenu managegold 8 goldadmin
+  popup addline managegold "->0.Cancle"
+  popup menuselect managegold wcs/addons/gold/goldadmin/givetakegold
+  es popup send managegold server_var(_popup_userid)
+}
+
+block givetakegold
+{
+  es_getplayersteamid gold_steam server_var(gold_userid)
+  es_getplayername gold_name server_var(gold_userid)
+  if (server_var(_popup_choice) == 1) do
+  {
+    es_keygetvalue curgold gold server_var(gold_steam) gold
+    es_xmath curgold + 100
+    es_keysetvalue gold server_var(gold_steam) gold server_var(curgold)
+    es_xdoblock wcs/addons/gold/goldadmin/usergold
+  }
+  if (server_var(_popup_choice) == 2) do
+  {
+    es_keygetvalue curgold gold server_var(gold_steam) gold
+    es_xmath curgold - 100
+    es_keysetvalue gold server_var(gold_steam) gold server_var(curgold)
+    es_xdoblock wcs/addons/gold/goldadmin/usergold
+  }
+  if (server_var(_popup_choice) == 3) do
+  {
+    es_keygetvalue curgold gold server_var(gold_steam) gold
+    es_xmath curgold + 5000
+    es_keysetvalue gold server_var(gold_steam) gold server_var(curgold)
+    es_xdoblock wcs/addons/gold/goldadmin/usergold
+  }
+  if (server_var(_popup_choice) == 4) do
+  {
+    es_keygetvalue curgold gold server_var(gold_steam) gold
+    es_xmath curgold - 5000
+    es_keysetvalue gold server_var(gold_steam) gold server_var(curgold)
+    es_xdoblock wcs/addons/gold/goldadmin/usergold
+  }
+  if (server_var(_popup_choice) == 5) do
+  {
+    popup create cleargold
+    popup addlinef cleargold "Take all of %1 's Gold" gold_name
+    popup addline cleargold "->1.Confirm"
+    popup addline cleargold "->2.Cancel"
+    popup menuselect cleargold wcs/addons/gold/goldadmin/clearconfirm
+    es popup send cleargold server_var(_popup_userid)
+  }
+}
+
+block clearconfirm
+{
+  if (server_var(_popup_choice) == 1) do
+  {
+    es_keysetvalue gold server_var(gold_steam) gold 0
+    es_xdoblock wcs/addons/gold/goldadmin/usergold
+  }
+  if (server_var(_popup_choice) == 2) do
+  {
+    es popup send goldadmin server_var(_popup_userid)
+  }
+}
+
+block goldconfig
+{
+  if (server_var(_popup_choice) == 1) do
+  {
+    es_keygetvalue rand_gold gold_config gold_settings gold_per_kill
+    es_xmath rand_gold + 5
+    es_keysetvalue gold_config gold_settings gold_per_kill server_var(rand_gold)
+    es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+  }
+  if (server_var(_popup_choice) == 2) do
+  {
+    es_keygetvalue rand_gold gold_config gold_settings gold_per_kill
+    es_xmath rand_gold - 5
+    es_keysetvalue gold_config gold_settings gold_per_kill server_var(rand_gold)
+    es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+  }
+  if (server_var(_popup_choice) == 3) do
+  {
+    es_xkeygetvalue gold_headshot gold_config gold_settings headshot
+    es_xmath gold_headshot + 5
+    es_keysetvalue gold_config gold_settings headshot server_var(gold_headshot)
+    es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+  }
+  if (server_var(_popup_choice) == 4) do
+  {
+    es_xkeygetvalue gold_headshot gold_config gold_settings headshot
+    es_xmath gold_headshot - 5
+    es_keysetvalue gold_config gold_settings headshot server_var(gold_headshot)
+    es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+  }
+  if (server_var(_popup_choice) == 5) do
+  {
+    es_xkeygetvalue gold_knife gold_config gold_settings knife
+    es_xmath gold_knife + 5
+    es_keysetvalue gold_config gold_settings knife server_var(gold_knife)
+    es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+  }
+  if (server_var(_popup_choice) == 6) do
+  {
+    es_xkeygetvalue gold_knife gold_config gold_settings knife
+    es_xmath gold_knife - 5
+    es_keysetvalue gold_config gold_settings knife server_var(gold_knife)
+    es_xdoblock wcs/addons/gold/goldadmin/goldvalues
+  }
+}
+

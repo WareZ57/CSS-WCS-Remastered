@@ -1,0 +1,66 @@
+block load
+{
+	////////////////////////////////////////////////////////////////////////////////
+	//Race of the Day -addon for Warcraft: Source. Made by: RedNäck, Kami, Kamiqawa
+	////////////////////////////////////////////////////////////////////////////////
+	//Quick installation: move folders 'rotd' and 'choose' to your server's
+	// 						cstrike/addons/eventscripts/wcs/addons -folder.
+	//
+	//Then add a new line and write 'rotd' (without the '') to your wcs/config/addons.cfg
+	////////////////////////////////////////////////////////////////////////////////
+	//Configs:
+	////////////////////////////////////////////////////////////////////////////////
+	//Set the amount of xp player gains when he kills an enemy WITH the race of the day
+	es_xset wcs_rotd_killer 122
+	
+	//Set the amount of xp player gains when he kills an enemy WHO PLAYS AS the race of the day
+	es_xset wcs_rotd_killed 15
+	
+	//Set how often will the message informing about race of the day be sent to players on round start?
+	//The chance of sending the msg is as percent to 100. For example, setting here 50 would show the message approximately every second round
+	es_xset wcs_rotd_msg_chance 30
+	////////////////////////////////////////////////////////////////////////////////
+	//End of Configs
+	////////////////////////////////////////////////////////////////////////////////
+	//***** Warcraft: Source official site and forum: www.warcraft-source.com  *****
+	////////////////////////////////////////////////////////////////////////////////
+	
+	es_load wcs/addons/choose
+	//es_xset wcs_rotdrace 0
+	es_xset wcs_rotd_version "WCS Race Of The Day -version: 0.2"
+	es_makepublic wcs_rotd_version
+}
+
+block unload
+{
+	es_unload wcs/addons/choose
+}
+
+event round_start
+{
+	if (server_var(wcs_dice) <= server_var(wcs_rotd_msg_chance)) then es_xmsg #multi #green[#defaultROTD#green] #lightgreenRace of the day is#green server_var(wcs_rotdrace)#lightgreen. You will get extra#green server_var(wcs_rotd_killed)xp #lightgreenfor killing it.
+}
+
+event player_spawn
+{
+	es wcs_getinfo event_var(userid) wcs_tmp6 currace player
+	if (server_var(wcs_tmp6) = server_var(wcs_rotdrace)) do
+	{
+		es_tell event_var(userid) #multi #green[#defaultROTD#green] #lightgreenYou are currently playing with race of the day #green server_var(wcs_rotdrace)#lightgreen. You will get extra#green server_var(wcs_rotd_killer)xp #lightgreenwhenever you kill an enemy.
+	}
+	es wcs_getinfo event_var(userid) wcs_tmp7 currace player
+}
+
+event player_death
+{
+	es wcs_getinfo event_var(userid) wcs_tmp7 currace player
+	es wcs_getinfo event_var(attacker) wcs_tmp8 currace player
+	if (server_var(wcs_tmp8) = server_var(wcs_rotdrace)) do
+	{
+		es wcs_givexp event_var(attacker) server_var(wcs_rotd_killer) "for making a kill as race of the day"
+	}
+	if (server_var(wcs_tmp7) = server_var(wcs_rotdrace)) do
+	{
+		es wcs_givexp event_var(userid) server_var(wcs_rotd_killed) "for killing race of the day"
+	}
+}

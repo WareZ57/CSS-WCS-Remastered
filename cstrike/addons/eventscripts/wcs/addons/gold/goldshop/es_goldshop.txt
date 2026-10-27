@@ -1,0 +1,102 @@
+block load
+{
+  es_xset ex 0
+  es_xset ex_1 0
+  es_regclientcmd goldshop "wcs/addons/gold/goldshop/goldshop" "goldshop"
+  es_regsaycmd goldshop "wcs/addons/gold/goldshop/goldshop" "goldshop"
+}
+
+block goldshop
+{
+  es_xgetcmduserid gold_userid
+  es_getplayersteamid gold_steam server_var(gold_userid)
+  es_keygetvalue gold_kills gold server_var(gold_steam) kills
+  es_keygetvalue curgold gold server_var(gold_steam) gold
+  es_format gold_format "GoldShop"
+  es popup easymenu server_var(gold_format) goldshop_cat wcs/addons/gold/goldshop/goldshopcat
+  es_xforeachkey gold_key in "goldshop_cat" "es_xdoblock wcs/addons/gold/goldshop/foreach"
+  es popup send server_var(gold_format) server_var(gold_userid)
+}
+
+block foreach
+{
+  es_keygetvalue gold_tmp goldshop_cat server_var(gold_key) name
+  es_keygetvalue gold_kill goldshop_cat server_var(gold_key) kills_required
+  if (server_var(gold_kills) >= server_var(gold_kill)) then es popup addoption server_var(gold_format) server_var(gold_key) server_var(gold_tmp) 1
+}
+
+block goldshopcat
+{
+  es_format gold_menu "Select an Item" 
+  es popup easymenu server_var(gold_menu) gold_item wcs/addons/gold/goldshop/golditem
+  es_xforeachkey gold_key in "goldshop" "es_xdoblock wcs/addons/gold/goldshop/golds"
+  es popup send server_var(gold_menu) server_var(_popup_userid)
+}
+
+block golds
+{
+  es_keygetvalue gold_tmp1 goldshop server_var(gold_key) category
+  if (server_var(gold_tmp1) = server_var(gold_cat)) do
+  {
+    es_keygetvalue gold_tmp goldshop server_var(gold_key) name
+    es_keygetvalue gold_cost goldshop server_var(gold_key) cost
+    es_keygetvalue gold_description goldshop server_var(gold_key) description
+    es_keygetvalue gold_required goldshop server_var(gold_key) required
+    es_keygetvalue gold_max_amount goldshop server_var(gold_key) max_amount
+    es_keygetvalue gold_max golddata server_var(gold_steam) server_var(gold_key)
+    es_keygetvalue gold_block goldshop server_var(gold_key) block
+    if (server_var(gold_max) != server_var(gold_max_amount)) then es_xset gold_restrict 1
+    if (server_var(gold_max) = server_var(gold_max_amount)) then es_xset gold_restrict 0
+    if (server_var(gold_max) != 0) then es_format gold_format "%1 - %2 G (%3/%4)" server_var(gold_tmp) server_var(gold_cost) server_var(gold_max) server_var(gold_max_amount)
+    if (server_var(gold_max) = 0) then es_format gold_format "%1 - %2 G" server_var(gold_tmp) server_var(gold_cost)
+    if (server_var(curgold) < server_var(gold_cost)) then if (server_var(gold_kills) >= server_var(gold_required)) then es popup addoption server_var(gold_menu) server_var(gold_key) server_var(gold_format) 0
+    if (server_var(curgold) >= server_var(gold_cost)) then if (server_var(gold_kills) >= server_var(gold_required)) then es popup addoption server_var(gold_menu) server_var(gold_key) server_var(gold_format) server_var(gold_restrict)
+  }
+}
+
+block golditem
+{
+  es_keygetvalue gold_tmp goldshop server_var(gold_item) name
+  es_keygetvalue gold_cost goldshop server_var(gold_item) cost
+  es_keygetvalue gold_description goldshop server_var(gold_item) description
+  es_keygetvalue gold_required goldshop server_var(gold_item) required
+  es_keygetvalue gold_max_amount goldshop server_var(gold_item) max_amount
+  es_keygetvalue gold_max golddata server_var(gold_steam) server_var(gold_item)
+  if (server_var(gold_max) != 0) then es_format gold_formatv "%1 - %2 G (%3/%4)" server_var(gold_tmp) server_var(gold_cost) server_var(gold_max) server_var(gold_max_amount)
+  if (server_var(gold_max) = 0) then es_format gold_formatv "%1 - %2 G" server_var(gold_tmp) server_var(gold_cost)
+  es popup create server_var(gold_item) 
+  es popup addlinef server_var(gold_item) "%1" gold_formatv
+  es popup addline server_var(gold_item) "----------"
+  es popup addlinef server_var(gold_item) "%1" gold_description
+  es popup addlinef server_var(gold_item) "%1 Gold" gold_cost 
+  es popup addline server_var(gold_item) "----------"
+  if (server_var(gold_max) < server_var(gold_max_amount)) then es popup addline server_var(gold_item) "->1.Buy"
+  es popup addline server_var(gold_item) "->8.Back"
+  es popup addline server_var(gold_item) "->0.Cancel"
+  es popup submenu server_var(gold_item) 8 server_var(gold_menu)
+  es popup menuselect server_var(gold_item) wcs/addons/gold/goldshop/golditema
+  es popup send server_var(gold_item) server_var(_popup_userid)
+}
+
+block golditema
+{
+  if (server_var(_popup_choice) == 1) do
+  {
+    es_getplayersteamid gold_steam server_var(_popup_userid)
+    es_keygetvalue gold_name goldshop server_var(gold_item) name
+    es_keygetvalue gold_block goldshop server_var(gold_item) block
+    es_keygetvalue gold_max_amount goldshop server_var(gold_item) max_amount
+    es_keygetvalue gold_max golddata server_var(gold_steam) server_var(gold_item)
+    es_keygetvalue curgold gold server_var(gold_steam) gold
+    es_math curgold - server_var(gold_cost)
+    es_keysetvalue gold server_var(gold_steam) gold server_var(curgold)
+    es_format gold_format "wcs/addons/gold/goldblocks/%1" server_var(gold_block)
+    es_doblock server_var(gold_format)
+    es_tell server_var(_popup_userid) #multi #lightgreen You have Purchased #green server_var(gold_name)
+    if (server_var(gold_max_amount) != 0) do
+    {     
+      es_xmath gold_max + 1
+      es_keysetvalue golddata server_var(gold_steam) server_var(gold_item) server_var(gold_max)
+    }
+  }
+}

@@ -1,0 +1,13 @@
+Requirements:
+- Eventscripts
+- MetaMod:Source, MetaMod.vdf
+- SourceMod, SDKHooks
+
+Installing:
+- Extract zip content into cstrike folder and add folowing code to cfg/autoexec.cfg:
+es_load wcs
+
+Configuring:
+- Edit wcs settings: addons/eventscripts/wcs/config/config.cfg (generated after 1st load of wcs)
+- Edit races, items & categories: addons/eventscripts/wcs/ini/
+- Edit ultimates: addons/eventscripts/wcs/tools/ultimates/

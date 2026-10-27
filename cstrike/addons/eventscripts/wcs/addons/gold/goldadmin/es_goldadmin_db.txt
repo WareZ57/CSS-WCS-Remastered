@@ -1,0 +1,14 @@
+"goldadmin"
+{
+	"STEAM_0:0:0"
+	{
+		"name"		"HOLLIDAY"
+		"GoldIsAdmin"		"1"
+		"Give_Gold"		"1"
+		"Take_Gold"		"1"
+		"gold_settings"		"1"
+		"Gold_Items"		"1"
+		"Gold_Admins"		"1"
+		"goldadmin"		"1"
+	}
+}
